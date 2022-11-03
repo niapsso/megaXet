@@ -1,0 +1,62 @@
+.container {
+  padding: 0 2rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+
+  > main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50px;
+    background: #3d3d3d;
+    box-shadow: 35px -35px 70px #343434, -35px 35px 70px #464646;
+    padding: 20px 40px;
+    border-radius: 4px;
+
+    width: 80%;
+
+    max-width: 750px;
+
+    gap: 2rem;
+
+    > ul {
+      display: flex;
+      flex-direction: column;
+      list-style: none;
+      width: 100%;
+      gap: 1rem;
+
+      height: 400px;
+      max-height: 400px;
+
+      overflow: auto;
+      padding-bottom: 10px;
+      padding-right: 10px;
+
+      > li {
+        width: max-content;
+        color: #ede2e2;
+        padding: 8px;
+        border: 1px solid #8c7373;
+        border-radius: 4px;
+      }
+    }
+
+    > form {
+      display: flex;
+      width: 100%;
+      gap: 1rem;
+    }
+  }
+}
+
+.clearButton {
+  position: absolute;
+  top: 90%;
+  left: 90%;
+}
