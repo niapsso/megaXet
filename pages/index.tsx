@@ -26,7 +26,9 @@ export default function Home() {
   const socketInitializer = async () => {
     await fetch("/api/socket", { method: "POST" });
 
-    socket = io();
+    console.log(process.env.nextEnv);
+
+    socket = io("https://e-o-xet.herokuapp.com");
 
     socket.on("connect", () => {});
 
