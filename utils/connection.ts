@@ -1,25 +1,16 @@
-import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
-const { MONGODB_URI } = process.env;
+let messages: { _id: string; author: string; message: string }[] = [];
 
-if (!MONGODB_URI) {
-  throw new Error(
-    "Mongo db URI must be provided in a .env file, with MONGODB_URI as key"
-  );
-}
+export const connection = () => {
+  const findAll = () => messages;
 
-export const connection = async () => {
-  const conn = await mongoose
-    .connect(MONGODB_URI, { ssl: true })
-    .catch((err) => console.error("Error during database initialization", err));
+  const create = (msg: { author: string; message: string }) => {
+    messages.push({ ...msg, _id: uuidv4() });
+  };
 
-  const MessageSchema = new mongoose.Schema({
-    author: String,
-    message: String,
-  });
-
-  const Message =
-    mongoose.models.Message || mongoose.model("Message", MessageSchema);
-
-  return { conn, Message };
+  const deleteMany = () => {
+    messages = [];
+  };
+  return { findAll, create, deleteMany };
 };

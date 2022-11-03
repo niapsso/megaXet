@@ -51,6 +51,14 @@ export default function Home() {
     getMessages();
   }, []);
 
+  useEffect(() => {
+    const listContainer = document.querySelector("ul");
+
+    if (listContainer) {
+      listContainer.scrollTop = listContainer.scrollHeight;
+    }
+  }, [messages]);
+
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

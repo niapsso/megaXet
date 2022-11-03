@@ -19,15 +19,15 @@ interface NextApiResponseWithSocket extends NextApiResponse {
   socket: SocketWithIO;
 }
 
-export default async function handler(
+export default function handler(
   req: NextApiRequest,
   res: NextApiResponseWithSocket
 ) {
-  const { Message } = await connection();
+  const { create, deleteMany, findAll } = connection();
 
   switch (req.method) {
     case "GET":
-      return res.json(await Message.find({}).lean());
+      return res.json(findAll());
     case "POST":
       if (!res.socket.server.io) {
         const io = new Server(res.socket.server);
@@ -36,9 +36,9 @@ export default async function handler(
 
         io.on("connection", (socket) => {
           socket.on("newMessage", async (msg: message) => {
-            await Message.create(msg);
+            create(msg);
 
-            const messages = await Message.find({}).lean();
+            const messages = findAll();
 
             socket.broadcast.emit("updateMessages", messages);
           });
@@ -47,7 +47,7 @@ export default async function handler(
 
       return res.end();
     case "DELETE":
-      await Message.deleteMany();
+      deleteMany();
 
       return res.status(204).json({});
   }
