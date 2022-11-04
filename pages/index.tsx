@@ -26,31 +26,21 @@ export default function Home() {
   const socketInitializer = async () => {
     await fetch("/api/socket", { method: "POST" });
 
-    console.log(process.env.nextEnv);
+    socket = io(window.location.href);
 
-    socket = io("https://e-o-xet.herokuapp.com");
+    socket.on("connect", () => {
+      console.log("socket connected!");
+    });
 
-    socket.on("connect", () => {});
-
-    socket.on("updateMessages", (msgs: message[]) => {
-      getMessages();
+    socket.on("updateMessages", (msg: message) => {
+      setMessages((prev) => [...prev, msg]);
     });
   };
 
-  const deleteAll = async () =>
-    await fetch("/api/socket", { method: "DELETE" }).then(() => getMessages());
-
-  const getMessages = async () =>
-    await fetch("/api/socket")
-      .then((res) => res.json())
-      .then(setMessages);
+  const deleteAll = async () => setMessages([]);
 
   useEffect(() => {
     socketInitializer();
-  }, []);
-
-  useEffect(() => {
-    getMessages();
   }, []);
 
   useEffect(() => {
