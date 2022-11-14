@@ -1,17 +1,15 @@
-import type { Socket } from "socket.io-client";
-
-import { io } from "socket.io-client";
+import Pusher from "pusher-js";
+import Head from "next/head";
+import axios from "axios";
 import { TextField, Button } from "@mui/material";
 import { useState, useEffect, FormEvent } from "react";
-import Head from "next/head";
+
 import styles from "../styles/Home.module.scss";
+import { channelName } from "../utils/connection";
 
-let socket: Socket;
-
-export type message = {
+type message = {
   author: string;
   message: string;
-  _id: string;
 };
 
 export default function Home() {
@@ -23,25 +21,15 @@ export default function Home() {
     message: false,
   });
 
-  const socketInitializer = async () => {
-    await fetch("/api/socket", { method: "POST" });
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    socket = io(window.location.href);
+    setFieldErrors({ author: !author, message: !message });
 
-    socket.on("connect", () => {
-      console.log("socket connected!");
-    });
-
-    socket.on("updateMessages", (msg: message) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    if (author && message) {
+      await axios.post("/api/messages/", { author, message });
+    }
   };
-
-  const deleteAll = async () => setMessages([]);
-
-  useEffect(() => {
-    socketInitializer();
-  }, []);
 
   useEffect(() => {
     const listContainer = document.querySelector("ul");
@@ -51,15 +39,21 @@ export default function Home() {
     }
   }, [messages]);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_APP_KEY as string, {
+      cluster: "sa1",
+    });
 
-    setFieldErrors({ author: !author, message: !message });
+    const channel = pusher.subscribe(channelName);
 
-    if (author && message) {
-      socket.emit("newMessage", { author, message });
-    }
-  };
+    channel.bind("new-message", (data: message) => {
+      setMessages((prev) => [...prev, data]);
+    });
+
+    return () => {
+      pusher.unsubscribe(channelName);
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -80,8 +74,8 @@ export default function Home() {
         />
 
         <ul>
-          {messages.map(({ _id, author, message }) => (
-            <li key={_id}>
+          {messages.map(({ author, message }, idx) => (
+            <li key={idx}>
               <span>
                 <b>{author}: </b>
                 {message}
@@ -105,11 +99,6 @@ export default function Home() {
           </Button>
         </form>
       </main>
-      <div className={styles.clearButton}>
-        <Button variant="outlined" onClick={() => deleteAll()}>
-          clear
-        </Button>
-      </div>
     </div>
   );
 }
