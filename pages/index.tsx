@@ -27,7 +27,9 @@ export default function Home() {
     setFieldErrors({ author: !author, message: !message });
 
     if (author && message) {
-      await axios.post("/api/messages/", { author, message });
+      await axios
+        .post("/api/messages/", { author, message })
+        .then(() => setMessage(""));
     }
   };
 
